@@ -1,0 +1,66 @@
+
+#console {
+    /*height: 100%;*/
+    /*display: table-row;*/
+    width: 100%;
+    /*margin-bottom: -2em;*/
+    color: #00FF00;
+    padding-left: 7px;
+    word-wrap: break-word;
+}
+
+#input {
+    background-color: black;
+    height: 2em;
+    width: 98%;
+    box-sizing: border-box;
+    position: absolute;
+    border-style: none;
+    color: #00FF00;
+    padding: 0px 0px 0px 0px;
+    vertical-align: middle;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    background-color: black;
+}
+
+body {
+    margin: 0px;
+    height: 100%;
+    //display: table;
+}
+
+#go {
+    z-index: 1000;
+    position: absolute;
+    right: 0px;
+    width: 6em;
+    background-color: gray;
+    border-style: none;
+    cursor: pointer;
+    color: black;
+}
+
+div, button, input{
+    color: #00FF00;
+    box-sizing: border-box;
+    font-size: 20px;
+    font-family: 'Lekton', sans-serif;
+}
+#bottomDiv {
+    height: 2em;
+}
+
+#prompt {
+    display: inline-block;
+    box-sizing: border-box;
+    height: 2em;
+    padding-left: 7px;
+}
+
+#dir {
+    display: inline;
+}
