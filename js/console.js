@@ -4,6 +4,9 @@ var commandHistory = new Array();
 var curDir = "~"
 var keyIndex = 0;
 var folderArray = {};
+var rain = 1;
+var pass = undefined;
+var fileMap = {};
 
 function addToHelpRegister(command, desc) {
     helpRegister[command] = desc;
@@ -22,8 +25,20 @@ function run() {
     if (text == "") {
         return;
     }
+    if (pass !== undefined){
+        if (CryptoJS.SHA3(text) == pass[0]){
+            curDir = folderArray[pass[1]];
+            printErrorToConsole("Password Correct, Welcome USER");
+            $("#dir").text(curDir.name);
+        } else {
+            printErrorToConsole("Incorrect Password");
+        }
+        $('#input').val("");
+        pass = undefined;
+        return;
+    }
     commandHistory.push(text);
-    printToConsole("$" + curDir.name + " " + text);
+    printToConsole("$ " + curDir.name + "&gt;" + text);
     keyIndex = commandHistory.length;
     var input = text.split(" ");
     input[0] = input[0].toLowerCase();
@@ -89,6 +104,9 @@ function helpMessage(){
     printCommandToConsole("Displaying System Help");
     for (var alias in commandRegister) {
         if (commandRegister.hasOwnProperty(alias)) {
+            if (alias == "potato"){
+                continue;
+            }
             var command = commandRegister[alias];
             printToConsole(alias + " " + helpRegister[command]);
         }
@@ -117,6 +135,11 @@ function ls(){
 function cd(args){
     if (args.length > 2){
         return;
+    } else if(args.length == 1 || args[1] == "~"){
+        curDir = folderArray["~"];
+        folderName = "~";
+        $("#dir").text(folderName);
+        return;
     }
     var folders = curDir.childFolders;
     var folderName = args[1];
@@ -131,6 +154,11 @@ function cd(args){
     } else {
         var index = $.inArray(folderName, folders);
         if (index != -1){
+            if (folderArray[folderName].pwd !== undefined){
+                printCommandToConsole("Welcome USER. Please enter the password:");
+                pass = [folderArray[folderName].pwd, folderName];
+                return;
+            }
             curDir = folderArray[folderName];
         } else {
             printErrorToConsole("Error: The folder " + folderName + " does not exist");
@@ -140,6 +168,72 @@ function cd(args){
     $("#dir").text(folderName);
 }
 
+function printHistory(){
+    var out = "";
+    for (var i = 0; i<commandHistory.length; i++){
+        out = out + commandHistory[i] + "; ";
+    }
+    printToConsole(out);
+}
+
+function create(){
+    var w = $(document).width()
+    var x = w * Math.random();
+    if (w-x < 50){
+        x = x-75;
+    }
+    var img = $('<img />',
+                 { class: 'potato',
+                   src: 'icons/potato.png', 
+                   alt:'Potato-Chan has made it rain'})
+                  .appendTo($('body'));
+    $(img).css('left', x);
+    $(img).css('top', -50);
+    spam = setTimeout(create,500);
+}
+
+function drop(){
+    $('.potato').each(function(){
+        this.style.top = parseInt(this.style.top) + 10 + 'px';
+        if ($(document).height() - parseInt(this.style.top) < 60){
+            $(this).remove();
+        }
+    });
+    animate = setTimeout(drop, 20);
+}
+
+function potato(){
+    if (rain){
+        create();
+        drop();
+        rain = 0;
+    } else {
+        $('.potato').remove();
+        clearTimeout(spam);
+        clearTimeout(animate);
+        rain = 1;
+    }
+}
+
+function less(args){
+    if (args.length != 2){
+        printErrorToConsole("Error: Invalid Args");
+        return;
+    }
+    var fileName = args[1];
+    var files = curDir.files;
+    var index = $.inArray(fileName, files);
+    if (index != -1){
+        var loc = fileMap[fileName];
+        var win = window.open(loc, '_blank');
+        if(win){
+            win.focus();
+        }else{
+            printErrorToConsole('Please allow popups for this site');
+        }
+    }
+}
+
 function commands() {
     addToHelpRegister(clearConsole, "Clears the console");
     addToCommandRegister("cls", clearConsole);
@@ -147,8 +241,8 @@ function commands() {
 
     addToHelpRegister(clearHistory, "Clears console history");
     addToCommandRegister("clsh", clearHistory);
-    addToCommandRegister("clearHist", clearHistory);
-    addToCommandRegister("clearHistory", clearHistory);
+    addToCommandRegister("clearhist", clearHistory);
+    addToCommandRegister("clearhistory", clearHistory);
     
     addToHelpRegister(helpMessage, "Displays this help message");
     addToCommandRegister("help", helpMessage);
@@ -159,15 +253,34 @@ function commands() {
     
     addToHelpRegister(cd, "Change the current directory");
     addToCommandRegister("cd", cd);
+    
+    addToHelpRegister(printHistory, "Prints the console command history");
+    addToCommandRegister("hist", printHistory);
+    addToCommandRegister("history", printHistory);
+    addToCommandRegister("printhistory", printHistory);
+    addToCommandRegister("potato", potato);
+    
+    addToHelpRegister(less, "Opens a file");
+    addToCommandRegister("less", less);
 }
 
 // ---------
 
 function initFolders(){
     folderArray["~"] = {name:"~", parent:undefined, childFolders:["journals", "logs"], files:undefined, pwd:undefined};
-    folderArray["journals"] = {name:"journals", parent:"~", childFolders:undefined, files:undefined, pwd:undefined};
-    folderArray["logs"] = {name:"logs", parent:"~", childFolders:["roland"], files:undefined, pwd:undefined};
-    folderArray["roland"] = {name:"roland", parent:"logs", childFolders:undefined, files:["diary/roland/Roland-1.html", "diary/roland/Roland-2.html", "diary/roland/Roland-3.html"], pwd:'27cfe1c4c58e082c734bd19495dc681aed2563468cd5a6903f98580198e7e0cd4a615e67135f41c81fb861e967e7b660a0fa748515c7ee8cd94963d94434b13a'};
+    folderArray["logs"] = {name:"logs", parent:"~", childFolders:undefined, files:["log_3/9/15.txt"], pwd:undefined};
+    folderArray["journals"] = {name:"journals", parent:"~", childFolders:["roland", "violet"], files:undefined, pwd:undefined};
+    folderArray["roland"] = {name:"roland", parent:"journals", childFolders:undefined, files:["roland-1.txt", "roland-2.txt", "roland-3.txt"], pwd:'27cfe1c4c58e082c734bd19495dc681aed2563468cd5a6903f98580198e7e0cd4a615e67135f41c81fb861e967e7b660a0fa748515c7ee8cd94963d94434b13a'};
+    folderArray["violet"] = {name:"violet", parent:"journals", childFolders:undefined, files:["violet-1.txt", "violet-2.txt", "violet-3.txt"], pwd:"75741bbec44faa40ff4479e7640339b87f2b92fd6b5f11dd16a739006faf9c1415e06a3c21438bf96a45eb0dce0e9105e1be858f1dee981864b1e581a54c3af3"};
+    
+    fileMap["roland-1.txt"] = "diary/roland/Roland-1.html";
+    fileMap["roland-2.txt"] = "diary/roland/Roland-2.html";
+    fileMap["roland-3.txt"] = "diary/roland/Roland-3.html";
+    fileMap["violet-1.txt"] = "diary/violet/violet-1.html";
+    fileMap["violet-2.txt"] = "diary/violet/violet-2.html";
+    fileMap["violet-3.txt"] = "diary/violet/violet-3.html";
+    fileMap["log_3/9/15.txt"] = "story/Chap1.html";
+    
     curDir = folderArray["~"];
 }
 
