@@ -96,9 +96,6 @@ function helpMessage(){
 }
 
 function ls(){
-    /*$.each(curDir.childFolders, function(key){
-        printToConsole(key);
-    });*/
     var folders = curDir.childFolders;
     printToConsole('<span style="color:red;">./.</span>');
     if (curDir.parent !== undefined){
