@@ -7,6 +7,7 @@ var folderArray = {};
 var rain = 1;
 var pass = undefined;
 var fileMap = {};
+var lastPass = undefined;
 
 function addToHelpRegister(command, desc) {
     helpRegister[command] = desc;
@@ -28,9 +29,12 @@ function run() {
     if (pass !== undefined){
         if (CryptoJS.SHA3(text) == pass[0]){
             curDir = folderArray[pass[1]];
+            lastPass = text;
+            buildFileMap();
             printErrorToConsole("Password Correct, Welcome USER");
             $("#dir").text(curDir.name);
         } else {
+            $("#dir").text(curDir.name);
             printErrorToConsole("Incorrect Password");
         }
         $('#input').val("");
@@ -75,12 +79,12 @@ function initText() {
     printToConsole("-------------------------------");
 }
 
-function printCommandToConsole(text) {
-    $('#console').append("&gt; " + text + "<br/>");
-}
-
 function printToConsole(text) {
     $('#console').append(text + "<br/>");
+}
+
+function printCommandToConsole(text) {
+    printToConsole("&gt; " + text);
 }
 
 function printErrorToConsole(text){
@@ -134,11 +138,12 @@ function ls(){
 
 function cd(args){
     if (args.length > 2){
+        printErrorToConsole("Error: Invalid Args");
         return;
-    } else if(args.length == 1 || args[1] == "~"){
+    }
+    if(args.length == 1 || args[1] == "~"){
         curDir = folderArray["~"];
         folderName = "~";
-        $("#dir").text(folderName);
         return;
     }
     var folders = curDir.childFolders;
@@ -157,6 +162,7 @@ function cd(args){
             if (folderArray[folderName].pwd !== undefined){
                 printCommandToConsole("Welcome USER. Please enter the password:");
                 pass = [folderArray[folderName].pwd, folderName];
+                $("#dir").text("");
                 return;
             }
             curDir = folderArray[folderName];
@@ -267,21 +273,51 @@ function commands() {
 // ---------
 
 function initFolders(){
-    folderArray["~"] = {name:"~", parent:undefined, childFolders:["journals", "logs"], files:undefined, pwd:undefined};
-    folderArray["logs"] = {name:"logs", parent:"~", childFolders:undefined, files:["log_3/9/15.txt"], pwd:undefined};
-    folderArray["journals"] = {name:"journals", parent:"~", childFolders:["roland", "violet"], files:undefined, pwd:undefined};
-    folderArray["roland"] = {name:"roland", parent:"journals", childFolders:undefined, files:["roland-1.txt", "roland-2.txt", "roland-3.txt"], pwd:'27cfe1c4c58e082c734bd19495dc681aed2563468cd5a6903f98580198e7e0cd4a615e67135f41c81fb861e967e7b660a0fa748515c7ee8cd94963d94434b13a'};
-    folderArray["violet"] = {name:"violet", parent:"journals", childFolders:undefined, files:["violet-1.txt", "violet-2.txt", "violet-3.txt"], pwd:"75741bbec44faa40ff4479e7640339b87f2b92fd6b5f11dd16a739006faf9c1415e06a3c21438bf96a45eb0dce0e9105e1be858f1dee981864b1e581a54c3af3"};
+    /* These folders are completely virtual and have no relavence the the server file structure.
+    A folders index in the map is it's name and the name property must be the same as this.
+    A folder must reference both it's parent folder as well as any child folders that exist (yes this does mean there is doubling up but it is much easier)
+    The files are the name of the files for the user to see, there is a mapping to the server location in the buildFileMap function
+    pwd is the encoding of the password */
+    folderArray["~"]        = {name:"~", 
+                               parent:undefined, 
+                               childFolders:["journals", "logs"], 
+                               files:undefined, 
+                               pwd:undefined};
+    folderArray["logs"]     = {name:"logs", 
+                               parent:"~", 
+                               childFolders:undefined, 
+                               files:["log_3/9/15.txt"], 
+                               pwd:undefined};
+    folderArray["journals"] = {name:"journals", 
+                               parent:"~", 
+                               childFolders:["roland", "violet"], 
+                               files:undefined, 
+                               pwd:undefined};
+    folderArray["roland"]   = {name:"roland", 
+                               parent:"journals", 
+                               childFolders:undefined, 
+                               files:["roland-1.txt", "roland-2.txt", "roland-3.txt"], 
+                               pwd:'27cfe1c4c58e082c734bd19495dc681aed2563468cd5a6903f98580198e7e0cd4a615e67135f41c81fb861e967e7b660a0fa748515c7ee8cd94963d94434b13a'};
+    folderArray["violet"]   = {name:"violet", 
+                               parent:"journals", 
+                               childFolders:undefined, 
+                               files:["violet-1.txt", "violet-2.txt", "violet-3.txt"], 
+                               pwd:"75741bbec44faa40ff4479e7640339b87f2b92fd6b5f11dd16a739006faf9c1415e06a3c21438bf96a45eb0dce0e9105e1be858f1dee981864b1e581a54c3af3"};
     
-    fileMap["roland-1.txt"] = "diary/roland/Roland-1.html";
-    fileMap["roland-2.txt"] = "diary/roland/Roland-2.html";
-    fileMap["roland-3.txt"] = "diary/roland/Roland-3.html";
-    fileMap["violet-1.txt"] = "diary/violet/violet-1.html";
-    fileMap["violet-2.txt"] = "diary/violet/violet-2.html";
-    fileMap["violet-3.txt"] = "diary/violet/violet-3.html";
-    fileMap["log_3/9/15.txt"] = "story/Chap1.html";
+    buildFileMap();
     
     curDir = folderArray["~"];
+}
+
+function buildFileMap(){
+    /* Maps the file location on the VFS to the physical file location */
+    fileMap["roland-1.txt"] = "diary/" + lastPass + "/Roland-1.html"; // In passworded folder
+    fileMap["roland-2.txt"] = "diary/" + lastPass + "/Roland-2.html";
+    fileMap["roland-3.txt"] = "diary/" + lastPass + "/Roland-3.html";
+    fileMap["violet-1.txt"] = "diary/" + lastPass + "/violet-1.html";
+    fileMap["violet-2.txt"] = "diary/" + lastPass + "/violet-2.html";
+    fileMap["violet-3.txt"] = "diary/" + lastPass + "/violet-3.html";
+    fileMap["log_3/9/15.txt"] = "story/Chap1.html"; // Non passworded folder
 }
 
 function init() {
