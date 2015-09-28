@@ -412,11 +412,13 @@ function init() {
         run();
     });
     $(document).keypress(function (e) {
+        $('#input').focus();
         if (e.which == 13) {
             run();
         }
     });
     $(document).keydown(function (e) {
+        $('#input').focus();
         if (e.which == 38) {
             historyUp();
         }
