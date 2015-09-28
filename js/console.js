@@ -106,20 +106,50 @@ function clearHistory() {
     printCommandToConsole("Command History Cleared");
 }
 
-function helpMessage(){
-    printCommandToConsole("Displaying System Help");
-    for (var alias in commandRegister) {
-        if (commandRegister.hasOwnProperty(alias)) {
-            if (alias == "potato"){
-                continue;
-            }
-            var command = commandRegister[alias];
-            printToConsole(alias + " " + helpRegister[command]);
-        }
+function helpMessage(args){
+    if (args.length > 2){
+        printErrorToConsole("Error: Invalid Args");
+    } else if (args.length == 2) {
+        helpSingle(args[1]);
+    } else {
+        helpAll();
     }
 }
 
-function ls(){
+function helpAll(){
+    printCommandToConsole("Displaying System Help");
+    var commandList = new Array();
+    for (var command in helpRegister){
+        if (helpRegister.hasOwnProperty(command)){
+            commandList.push(command);
+        }
+    }
+    for (var i = 0; i < commandList.length; i++){
+        var currentCommand = commandList[i];
+        var output = '<span style="color:#009900;">';
+        for (var alias in commandRegister) {
+            if (commandRegister.hasOwnProperty(alias)) {
+                var command = commandRegister[alias];
+                if (currentCommand == command){
+                    output = output + alias + "|"; 
+                }
+            }
+        }
+        output = output.substring(0, output.length - 1);
+        output = output + '</span> '  + helpRegister[currentCommand];
+        printToConsole(output);
+    }
+}
+
+function helpSingle(Command){
+    printErrorToConsole("Function not yet defined");
+}
+
+function ls(args){
+    if (args.length > 1){
+        printErrorToConsole("Error: Invalid Args");
+        return;
+    }
     var folders = curDir.childFolders;
     printToConsole('<span style="color:red;">./.</span>');
     if (curDir.parent !== undefined){
@@ -255,11 +285,11 @@ function commands() {
     addToHelpRegister(helpMessage, "Displays this help message");
     addToCommandRegister("help", helpMessage);
     
-    addToHelpRegister(ls, "Shows objects in the current folder");
+    addToHelpRegister(ls, "Shows all files and folders in the current folder");
     addToCommandRegister("ls", ls);
     addToCommandRegister("dir", ls);
     
-    addToHelpRegister(cd, "Change the current directory");
+    addToHelpRegister(cd, '<span style="color:#009900;">[foldername]</span> Change the current directory');
     addToCommandRegister("cd", cd);
     
     addToHelpRegister(printHistory, "Prints the console command history");
@@ -268,7 +298,7 @@ function commands() {
     addToCommandRegister("printhistory", printHistory);
     addToCommandRegister("potato", potato);
     
-    addToHelpRegister(less, "Opens a file");
+    addToHelpRegister(less, '<span style="color:#009900;">[filename]</span> Opens a file');
     addToCommandRegister("less", less);
 }
 
