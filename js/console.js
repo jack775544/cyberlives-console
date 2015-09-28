@@ -39,6 +39,7 @@ function run() {
         }
         $('#input').val("");
         pass = undefined;
+        window.scrollTo(0,document.body.scrollHeight);
         return;
     }
     commandHistory.push(text);
@@ -53,7 +54,8 @@ function run() {
         printErrorToConsole("Error: Command " + input[0] + " is not a valid command");
     }
     $('#input').val("");
-    $(document).scrollTop($(document)[0].scrollHeight);
+    //$(document).scrollTop($(document)[0].scrollHeight);
+    window.scrollTo(0,document.body.scrollHeight);
 }
 
 function historyUp() {

@@ -8,14 +8,11 @@
 
 #input {
     background-color: black;
-    /*height: 2em;*/
-    width: 98%;
+    width: 100%;
     box-sizing: border-box;
-    position: absolute;
     border-style: none;
     color: #00FF00;
     padding: 0px 0px 0px 0px;
-    vertical-align: middle;
 }
 
 html, body {
@@ -48,13 +45,12 @@ div, button, input{
     font-family: "Courier New", Courier, monospace;
 }
 #bottomDiv {
+    overflow: hidden;
     margin: 3px 0px 0px 0px;
 }
 
 #prompt {
-    display: inline-block;
-    box-sizing: border-box;
-    /*height: 2em;*/
+    float: left;
     padding-left: 7px;
 }
 
@@ -76,4 +72,9 @@ div, button, input{
     width: 100%;
     height: 100%;
     z-index: 10000;
+}
+#bottomDiv span {
+    display: block;
+    overflow: hidden;
+    padding: 0px;
 }
