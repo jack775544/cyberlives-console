@@ -1,13 +1,18 @@
+/* The website is now an open bash-like console that can navigate though a VFS 
+This could be done alot better however I have no access to server side code so this is the best that can be done for the client side */
+
 var commandRegister = {};
 var helpRegister = {};
 var commandHistory = new Array();
-var curDir = "~"
+var curDir = "~";
 var keyIndex = 0;
 var folderArray = {};
 var rain = 1;
 var pass = undefined;
 var fileMap = {};
 var lastPass = undefined;
+var loadCount = 0;
+var loadInterval= undefined;
 
 function addToHelpRegister(command, desc) {
     helpRegister[command] = desc;
@@ -54,7 +59,6 @@ function run() {
         printErrorToConsole("Error: Command " + input[0] + " is not a valid command");
     }
     $('#input').val("");
-    //$(document).scrollTop($(document)[0].scrollHeight);
     window.scrollTo(0,document.body.scrollHeight);
 }
 
@@ -77,7 +81,7 @@ function historyDown() {
 function initText() {
     printToConsole("Caelum OS");
     printToConsole("V2.0 Blue Edition");
-    printToConsole("To view system help type 'help'")
+    printToConsole("To view system help type 'help' or 'about' for details")
     printToConsole("-------------------------------");
 }
 
@@ -91,29 +95,6 @@ function printCommandToConsole(text) {
 
 function printErrorToConsole(text){
     printCommandToConsole('<span style="color:#009900;">' + text + '</span>');
-}
-
-// --------- Console Functions ---------
-
-function clearConsole() {
-    $('#console').text("");
-    initText();
-}
-
-function clearHistory() {
-    commandHistory = new Array;
-    keyIndex = 0;
-    printCommandToConsole("Command History Cleared");
-}
-
-function helpMessage(args){
-    if (args.length > 2){
-        printErrorToConsole("Error: Invalid Args");
-    } else if (args.length == 2) {
-        helpSingle(args[1]);
-    } else {
-        helpAll();
-    }
 }
 
 function helpAll(){
@@ -149,6 +130,29 @@ function helpSingle(alias){
     }
 }
 
+// --------- Console Functions ---------
+
+function clearConsole() {
+    $('#console').text("");
+    initText();
+}
+
+function clearHistory() {
+    commandHistory = new Array;
+    keyIndex = 0;
+    printCommandToConsole("Command History Cleared");
+}
+
+function helpMessage(args){
+    if (args.length > 2){
+        printErrorToConsole("Error: Invalid Args");
+    } else if (args.length == 2) {
+        helpSingle(args[1]);
+    } else {
+        helpAll();
+    }
+}
+
 function ls(args){
     if (args.length > 1){
         printErrorToConsole("Error: Invalid Args");
@@ -180,6 +184,7 @@ function cd(args){
     if(args.length == 1 || args[1] == "~"){
         curDir = folderArray["~"];
         folderName = "~";
+        $("#dir").text(folderName);
         return;
     }
     var folders = curDir.childFolders;
@@ -257,6 +262,11 @@ function potato(){
     }
 }
 
+function exposition(){
+    var text = "<h3>A Monochrome World</h3><p>In this modern world we commonly try to abstract things into shades of grey. No reason is ever wholly pure or evil, people live the way they want and do nothing else. However the world that we live in is one of binomial outcomes. Success or failure, life or death; nothing is indiscriminate; we exist in a world of monochrome. Anything else is merely an apologist’s illusion; an excuse to justify the actions that have been taken, for better or worse. One person’s white is another person’s black, one persons’ prestige is another person’s fall, and one person’s life is another person’s death. This is the way of the world - Sharfa</p>";
+    printToConsole(text);
+}
+
 function less(args){
     if (args.length != 2){
         printErrorToConsole("Error: Invalid Args");
@@ -276,7 +286,27 @@ function less(args){
     }
 }
 
+function about(){
+    printToConsole('Caelum OS Console. Release: <span style="color:#009900;">Eins</span><br/>Story written by <span style="color:#009900;">Potato-chan</span><br/>Console written by <span style="color:#009900;">Sharfa</span>');
+    printCommandToConsole('Look for Potato-chan on <a href="https://lainchan.org/irc" target="_blank">IRC</a>');
+}
+
+function irc(){
+    var win = window.open('https://lainchan.org/irc', '_blank');
+    if(win){
+        win.focus();
+    }else{
+        printErrorToConsole('Please allow popups for this site');
+    }
+}
+
 function commands() {
+    addToHelpRegister(about, "Information about the console");
+    addToCommandRegister("about", about);
+    
+    addToHelpRegister(irc, "Open the lainchan IRC in a new browser tab");
+    addToCommandRegister("irc", irc);
+    
     addToHelpRegister(clearConsole, "Clears the console");
     addToCommandRegister("cls", clearConsole);
     addToCommandRegister("clear", clearConsole);
@@ -287,6 +317,7 @@ function commands() {
     addToCommandRegister("clearhistory", clearHistory);
     
     addToHelpRegister(helpMessage, "Displays this help message");
+    addToCommandRegister("exposition" , exposition);
     addToCommandRegister("help", helpMessage);
     
     addToHelpRegister(ls, "Shows all files and folders in the current folder");
@@ -297,10 +328,10 @@ function commands() {
     addToCommandRegister("cd", cd);
     
     addToHelpRegister(printHistory, "Prints the console command history");
+    addToCommandRegister("potato", potato);
     addToCommandRegister("hist", printHistory);
     addToCommandRegister("history", printHistory);
     addToCommandRegister("printhistory", printHistory);
-    addToCommandRegister("potato", potato);
     
     addToHelpRegister(less, '<span style="color:#009900;">[filename]</span> Opens a file');
     addToCommandRegister("less", less);
@@ -356,6 +387,26 @@ function buildFileMap(){
     fileMap["log_3/9/15.txt"] = "story/Chap1.html"; // Non passworded folder
 }
 
+function loadScreen(){
+    var loadscreen = $('<div></div>',{id: 'loadscreen'}).appendTo($('body'));
+    var loadblock = $('<div></div>',{id: 'loadblock'}).appendTo($('#loadscreen'));
+    // Props to you if you understand where the message comes from.
+    $('#loadblock').append("Welcome to Caelum OS: The proactively insecure Unix-like operating system.<br/><br/>Loading ...");
+    var loadbar = $('<div></div>',{id: 'loadbar'}).appendTo($('#loadblock'));
+    loadbar.width(0);
+    loadInterval = window.setInterval(function(){
+        var w = $("#loadblock").width();
+        nw = w / 100.0;
+        $("#loadbar").width($("#loadbar").width()+nw);
+        loadCount = loadCount + 1;
+        if (loadCount >= 100) {
+            window.clearInterval(loadInterval);
+            $("#loadscreen").remove();
+            init();
+        }
+    },30);
+}
+
 function init() {
     $('#go').click(function () {
         run();
@@ -383,5 +434,5 @@ function init() {
 }
 
 $(document).ready(function () {
-    init();
+    loadScreen();
 });
