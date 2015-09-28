@@ -141,8 +141,12 @@ function helpAll(){
     }
 }
 
-function helpSingle(Command){
-    printErrorToConsole("Function not yet defined");
+function helpSingle(alias){
+    if (commandRegister.hasOwnProperty(alias)){
+        printToConsole(helpRegister[commandRegister[alias]]);
+    } else {
+        printErrorToConsole("Error: Command " + alias + " is not a valid command");
+    }
 }
 
 function ls(args){
