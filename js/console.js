@@ -263,7 +263,7 @@ function potato(){
 }
 
 function exposition(){
-    var text = "<h3>A Monochrome World</h3><p>In this modern world we commonly try to abstract things into shades of grey. No reason is ever wholly pure or evil, people live the way they want and do nothing else. However the world that we live in is one of binomial outcomes. Success or failure, life or death; nothing is indiscriminate; we exist in a world of monochrome. Anything else is merely an apologist’s illusion; an excuse to justify the actions that have been taken, for better or worse. One person’s white is another person’s black, one persons’ prestige is another person’s fall, and one person’s life is another person’s death. This is the way of the world - Sharfa</p>";
+    var text = "<h3>A Monochrome World</h3><p>In this modern world we commonly try to abstract things into shades of grey. No reason is ever wholly pure or evil, people live the way they want and do nothing else. However the world that we live in is one of binomial outcomes. Success or failure, life or death; nothing is indiscriminate; we exist in a world of monochrome. Anything else is merely an apologist’s illusion; an excuse to justify the actions that have been taken, for better or worse. One person’s white is another person’s black, one person's prestige is another person’s fall, and one person’s life is another person’s death. This is the way of the world - Sharfa</p>";
     printToConsole(text);
 }
 
@@ -300,6 +300,15 @@ function irc(){
     }
 }
 
+function legacy(){
+    var win = window.open('index_legacy.html', '_blank');
+    if(win){
+        win.focus();
+    }else{
+        printErrorToConsole('Please allow popups for this site');
+    }
+}  
+
 function commands() {
     addToHelpRegister(about, "Information about the console");
     addToCommandRegister("about", about);
@@ -335,6 +344,10 @@ function commands() {
     
     addToHelpRegister(less, '<span style="color:#009900;">[filename]</span> Opens a file');
     addToCommandRegister("less", less);
+    
+    addToHelpRegister(legacy, "View the non terminal version of the website");
+    addToCommandRegister("legacy", legacy);
+    addToCommandRegister("old", legacy);
 }
 
 // ---------
@@ -353,7 +366,7 @@ function initFolders(){
     folderArray["logs"]     = {name:"logs", 
                                parent:"~", 
                                childFolders:undefined, 
-                               files:["log_3/9/15.txt"], 
+                               files:["log_3/9/15.txt", "log_17/9/15.txt", "log_25/9/15.txt"], 
                                pwd:undefined};
     folderArray["journals"] = {name:"journals", 
                                parent:"~", 
@@ -385,6 +398,8 @@ function buildFileMap(){
     fileMap["violet-2.txt"] = "diary/" + lastPass + "/violet-2.html";
     fileMap["violet-3.txt"] = "diary/" + lastPass + "/violet-3.html";
     fileMap["log_3/9/15.txt"] = "story/Chap1.html"; // Non passworded folder
+    fileMap["log_17/9/15.txt"] = "story/Chap2.html";
+    fileMap["log_25/9/15.txt"] = "story/Chap3.html";
 }
 
 function loadScreen(){
