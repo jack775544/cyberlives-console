@@ -406,12 +406,13 @@ function loadScreen(){
     var loadscreen = $('<div></div>',{id: 'loadscreen'}).appendTo($('body'));
     var loadblock = $('<div></div>',{id: 'loadblock'}).appendTo($('#loadscreen'));
     // Props to you if you understand where the message comes from.
-    $('#loadblock').append("Welcome to Caelum OS: The proactively insecure Unix-like operating system.<br/><br/>Loading ...");
+    $('#loadblock').append('Welcome to Caelum OS: The proactively insecure Unix-like operating system.<br/><br/>Loading - <span id="loadpercent">0%</span><br/>');
     var loadbar = $('<div></div>',{id: 'loadbar'}).appendTo($('#loadblock'));
     loadbar.width(0);
     loadInterval = window.setInterval(function(){
         var w = $("#loadblock").width();
         nw = w / 100.0;
+        $("#loadpercent").text(loadCount + "%");
         $("#loadbar").width(nw * loadCount);
         $("#loadbar").width($("#loadbar").width()+nw);
         loadCount = loadCount + 1;
