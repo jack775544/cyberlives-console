@@ -54,7 +54,7 @@ function run() {
     input[0] = input[0].toLowerCase();
     var command = getCommand(input[0]);
     if (command !== undefined) {
-        command(input);
+        command(input, text);
     } else {
         printErrorToConsole("Error: Command " + input[0] + " is not a valid command");
     }
@@ -309,6 +309,16 @@ function legacy(){
     }
 }  
 
+function echo(args, original){
+    if (args.length == 1){
+        printToConsole("");
+    } else {
+        var result = original.substr(original.indexOf(" ") + 1);
+        printToConsole(result);
+    }
+}
+        
+
 function commands() {
     addToHelpRegister(about, "Information about the console");
     addToCommandRegister("about", about);
@@ -348,6 +358,9 @@ function commands() {
     addToHelpRegister(legacy, "View the non terminal version of the website");
     addToCommandRegister("legacy", legacy);
     addToCommandRegister("old", legacy);
+    
+    addToHelpRegister(echo, "Print the given string");
+    addToCommandRegister("echo", echo);
 }
 
 // ---------
