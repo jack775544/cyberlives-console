@@ -412,6 +412,7 @@ function loadScreen(){
     loadInterval = window.setInterval(function(){
         var w = $("#loadblock").width();
         nw = w / 100.0;
+        $("#loadbar").width(nw * loadCount);
         $("#loadbar").width($("#loadbar").width()+nw);
         loadCount = loadCount + 1;
         if (loadCount >= 100) {
