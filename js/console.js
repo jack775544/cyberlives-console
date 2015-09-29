@@ -417,6 +417,7 @@ function loadScreen(){
         if (loadCount >= 100) {
             window.clearInterval(loadInterval);
             $("#loadscreen").remove();
+            $('#console').text("");
             init();
         }
     },30);
