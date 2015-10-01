@@ -151,8 +151,6 @@ function runLess(args){
         case "q":
             closeLess();
             break;
-        default:
-            $("#lessHelpText").text("[END OF FILE] type q then return to exit");
     }
 }
 
@@ -317,6 +315,7 @@ function less(args){
         $('<p></p>',{id: 'lessHelpText'}).appendTo($('#loadscreen'));
         var lessInput = $('<input></input>',{id: 'lessInput', class: 'entry'}).appendTo($('#loadscreen'));
         $('#lessHelpText').text('[END OF FILE]');
+        $('#lessHelpText').append('<br/><span style="color:#009900;">type q then return to exit</span>');
         $("#story").load(loc + " #story", function() {
             enableLessBinds();
             window.scrollTo(0,0);
