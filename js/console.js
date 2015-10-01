@@ -152,8 +152,7 @@ function runLess(args){
             closeLess();
             break;
         default:
-            $("#lessHelpText").text("type q then return to exit");
-            //window.scrollTo(0,document.body.scrollHeight);
+            $("#lessHelpText").text("[END OF FILE] type q then return to exit");
     }
 }
 
@@ -193,9 +192,9 @@ function ls(args){
         return;
     }
     var folders = curDir.childFolders;
-    printToConsole('<span style="color:red;">./.</span>');
+    printToConsole('<span style="color:red;">.</span>');
     if (curDir.parent !== undefined){
-        printToConsole('<span style="color:red;">./..</span>');
+        printToConsole('<span style="color:red;">..</span>');
     }
     if (folders !== undefined){
         for (var i = 0; i<folders.length; i++){
@@ -317,7 +316,8 @@ function less(args){
         var storyText = $('<div></div>',{id: 'story'}).appendTo($('#loadscreen'));
         $('<p></p>',{id: 'lessHelpText'}).appendTo($('#loadscreen'));
         var lessInput = $('<input></input>',{id: 'lessInput', class: 'entry'}).appendTo($('#loadscreen'));
-        $("#story").load(loc, function() {
+        $('#lessHelpText').text('[END OF FILE]');
+        $("#story").load(loc + " #story", function() {
             enableLessBinds();
             window.scrollTo(0,0);
         });
@@ -450,7 +450,7 @@ function buildFileMap(){
     fileMap["violet-1.txt"] = "diary/" + lastPass + "/violet-1.html";
     fileMap["violet-2.txt"] = "diary/" + lastPass + "/violet-2.html";
     fileMap["violet-3.txt"] = "diary/" + lastPass + "/violet-3.html";
-    fileMap["log_3/9/15.txt"] = "story/Chap1.txt"; // Non passworded folder
+    fileMap["log_3/9/15.txt"] = "story/Chap1.html"; // Non passworded folder
     fileMap["log_17/9/15.txt"] = "story/Chap2.html";
     fileMap["log_25/9/15.txt"] = "story/Chap3.html";
 }
@@ -506,10 +506,12 @@ function disableBinds(){
 
 function enableLessBinds(){
     $(document).keydown(function (e) {
-        $('#lessInput').focus();
+        if (e.which != 38 && e.which != 40){
+            $('#lessInput').focus();
+        }
     });
     $(document).keypress(function (e) {
-        $('#lessInput').focus();
+        //$('#lessInput').focus();
         if (e.which == 13) {
             runLess($('#lessInput').val());
         }
