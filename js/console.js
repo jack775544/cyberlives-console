@@ -1,5 +1,9 @@
 /* The website is now an open bash-like console that can navigate though a VFS 
-This could be done alot better however I have no access to server side code so this is the best that can be done for the client side */
+This could be done alot better however I have no access to server side code so this is the best that can be done for the client side 
+
+Release History:
+Eins: Created console
+Zwei: Revamped less*/
 
 var commandRegister = {};
 var helpRegister = {};
@@ -13,6 +17,7 @@ var fileMap = {};
 var lastPass = undefined;
 var loadCount = 0;
 var loadInterval= undefined;
+var consoleVersion = "Zwei";
 
 function addToHelpRegister(command, desc) {
     helpRegister[command] = desc;
@@ -128,6 +133,35 @@ function helpSingle(alias){
     } else {
         printErrorToConsole("Error: Command " + alias + " is not a valid command");
     }
+}
+
+function runLess(args){
+    var text = $.trim(args);
+    $('#lessInput').val("");
+    switch(text) {
+        case "exit":
+            closeLess();
+            break;
+        case ":q":
+            closeLess();
+            break;
+        case "quit":
+            closeLess();
+            break;
+        case "q":
+            closeLess();
+            break;
+        default:
+            $("#lessHelpText").text("type q then return to exit");
+            //window.scrollTo(0,document.body.scrollHeight);
+    }
+}
+
+function closeLess(){
+    toggleConsole();
+    $('#loadscreen').remove();
+    disableBinds();
+    enableBinds();
 }
 
 // --------- Console Functions ---------
@@ -276,18 +310,24 @@ function less(args){
     var files = curDir.files;
     var index = $.inArray(fileName, files);
     if (index != -1){
+        toggleConsole();
+        disableBinds();
         var loc = fileMap[fileName];
-        var win = window.open(loc, '_blank');
-        if(win){
-            win.focus();
-        }else{
-            printErrorToConsole('Please allow popups for this site');
-        }
+        var storyScreen = $('<div></div>',{id: 'loadscreen'}).appendTo($('body'));
+        var storyText = $('<div></div>',{id: 'story'}).appendTo($('#loadscreen'));
+        $('<p></p>',{id: 'lessHelpText'}).appendTo($('#loadscreen'));
+        var lessInput = $('<input></input>',{id: 'lessInput', class: 'entry'}).appendTo($('#loadscreen'));
+        $("#story").load(loc, function() {
+            enableLessBinds();
+            window.scrollTo(0,0);
+        });
+    } else {
+        printErrorToConsole("Error: File not found");
     }
 }
 
 function about(){
-    printToConsole('Caelum OS Console. Release: <span style="color:#009900;">Eins</span><br/>Story written by <span style="color:#009900;">Potato-chan</span><br/>Console written by <span style="color:#009900;">Sharfa</span>');
+    printToConsole('Caelum OS Console. Release: <span style="color:#009900;">'+ consoleVersion +'</span><br/>Story written by <span style="color:#009900;">Potato-chan</span><br/>Console written by <span style="color:#009900;">Sharfa</span>');
     printCommandToConsole('Look for Potato-chan on <a href="https://lainchan.org/irc" target="_blank">IRC</a>');
 }
 
@@ -410,7 +450,7 @@ function buildFileMap(){
     fileMap["violet-1.txt"] = "diary/" + lastPass + "/violet-1.html";
     fileMap["violet-2.txt"] = "diary/" + lastPass + "/violet-2.html";
     fileMap["violet-3.txt"] = "diary/" + lastPass + "/violet-3.html";
-    fileMap["log_3/9/15.txt"] = "story/Chap1.html"; // Non passworded folder
+    fileMap["log_3/9/15.txt"] = "story/Chap1.txt"; // Non passworded folder
     fileMap["log_17/9/15.txt"] = "story/Chap2.html";
     fileMap["log_25/9/15.txt"] = "story/Chap3.html";
 }
@@ -419,7 +459,7 @@ function loadScreen(){
     var loadscreen = $('<div></div>',{id: 'loadscreen'}).appendTo($('body'));
     var loadblock = $('<div></div>',{id: 'loadblock'}).appendTo($('#loadscreen'));
     // Props to you if you understand where the message comes from.
-    $('#loadblock').append('Welcome to Caelum OS: The proactively insecure Unix-like operating system.<br/><br/>Loading - <span id="loadpercent">0%</span><br/>');
+    $('#loadblock').append('Welcome to Caelum OS: The proactively insecure Unix-like operating system.<br/><br/>Loading - <span id="loadpercent">0%</span><br/><br/>');
     var loadbar = $('<div></div>',{id: 'loadbar'}).appendTo($('#loadblock'));
     loadbar.width(0);
     loadInterval = window.setInterval(function(){
@@ -438,10 +478,8 @@ function loadScreen(){
     },30);
 }
 
-function init() {
-    $('#go').click(function () {
-        run();
-    });
+function enableBinds(){
+    $('#input').prop('disabled', false);
     $(document).keypress(function (e) {
         $('#input').focus();
         if (e.which == 13) {
@@ -458,9 +496,32 @@ function init() {
         }
     });
     $('#input').focus();
-    $('#input').focusout(function () {
-        $('#input').focus();
+};
+
+function disableBinds(){
+    $('#input').prop('disabled', true);
+    $(document).off("keypress");
+    $(document).off("keydown");
+}
+
+function enableLessBinds(){
+    $(document).keydown(function (e) {
+        $('#lessInput').focus();
     });
+    $(document).keypress(function (e) {
+        $('#lessInput').focus();
+        if (e.which == 13) {
+            runLess($('#lessInput').val());
+        }
+    });
+}
+
+function toggleConsole(){
+    $("#consoleMain").toggle();
+}
+
+function init() {
+    enableBinds();
     commands();
     initFolders();
     initText();
