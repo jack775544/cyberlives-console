@@ -359,7 +359,7 @@ function echo(args, original){
 
 function sha(args, original){
      if (args.length == 1){
-        printToConsole('');
+        printToConsole(CryptoJS.SHA3(''));
         return;
      }
     var message = original.substr(original.indexOf(" ") + 1);
