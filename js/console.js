@@ -53,7 +53,7 @@ function run() {
         return;
     }
     commandHistory.push(text);
-    printToConsole("$ " + curDir.name + "&gt;" + text);
+    printToConsole('<pre style="display:inline;">' + "$ " + curDir.name + "&gt;" + text + "</pre>");
     keyIndex = commandHistory.length;
     var input = text.split(" ");
     input[0] = input[0].toLowerCase();
@@ -356,9 +356,21 @@ function echo(args, original){
         printToConsole(result);
     }
 }
+
+function sha(args, original){
+     if (args.length == 1){
+        printToConsole('');
+        return;
+     }
+    var message = original.substr(original.indexOf(" ") + 1);
+    printToConsole(CryptoJS.SHA3(message));
+}
         
 
 function commands() {
+    addToHelpRegister(sha, "Encrypt a string using SHA3 encoding")
+    addToCommandRegister("encrypt", sha)
+    
     addToHelpRegister(about, "Information about the console");
     addToCommandRegister("about", about);
     
@@ -489,9 +501,10 @@ function enableBinds(){
         $('#input').focus();
         if (e.which == 38) {
             historyUp();
-        }
-        if (e.which == 40) {
+        } else if (e.which == 40) {
             historyDown();
+        } else {
+            keyIndex = commandHistory.length;
         }
     });
     $('#input').focus();
