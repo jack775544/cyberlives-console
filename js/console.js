@@ -364,8 +364,7 @@ function sha(args, original){
      }
     var message = original.substr(original.indexOf(" ") + 1);
     printToConsole(CryptoJS.SHA3(message));
-}
-        
+}        
 
 function commands() {
     addToHelpRegister(sha, "Encrypt a string using SHA3 encoding")
@@ -389,6 +388,7 @@ function commands() {
     addToHelpRegister(helpMessage, "Displays this help message");
     addToCommandRegister("exposition" , exposition);
     addToCommandRegister("help", helpMessage);
+    addToCommandRegister("man", helpMessage)
     
     addToHelpRegister(ls, "Shows all files and folders in the current folder");
     addToCommandRegister("ls", ls);
