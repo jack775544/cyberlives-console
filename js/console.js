@@ -17,7 +17,7 @@ var fileMap = {};
 var lastPass = undefined;
 var loadCount = 0;
 var loadInterval= undefined;
-var consoleVersion = "Zwei";
+var consoleVersion = "Drei";
 
 function addToHelpRegister(command, desc) {
     helpRegister[command] = desc;
@@ -31,8 +31,16 @@ function getCommand(command) {
     return commandRegister[command];
 }
 
+function getInputValue(){
+    return $.trim($('#input').val());
+}
+
+function setInputValue(value){
+    $('#input').val(value);
+}
+
 function run() {
-    var text = $.trim($('#input').val());
+    var text = getInputValue();
     if (text == "") {
         return;
     }
@@ -47,7 +55,7 @@ function run() {
             $("#dir").text(curDir.name);
             printErrorToConsole("Incorrect Password");
         }
-        $('#input').val("");
+        setInputValue("");
         pass = undefined;
         window.scrollTo(0,document.body.scrollHeight);
         return;
@@ -63,7 +71,7 @@ function run() {
     } else {
         printErrorToConsole("Error: Command " + input[0] + " is not a valid command");
     }
-    $('#input').val("");
+    setInputValue("");
     window.scrollTo(0,document.body.scrollHeight);
 }
 
@@ -72,7 +80,7 @@ function historyUp() {
         return;
     }
     keyIndex = keyIndex - 1;
-    $('#input').val(commandHistory[keyIndex]);
+    setInputValue(commandHistory[keyIndex]);
 }
 
 function historyDown() {
@@ -80,7 +88,7 @@ function historyDown() {
         return;
     }
     keyIndex = keyIndex + 1;
-    $('#input').val(commandHistory[keyIndex]);
+    setInputValue(commandHistory[keyIndex]);
 }
 
 function initText() {
@@ -364,7 +372,33 @@ function sha(args, original){
      }
     var message = original.substr(original.indexOf(" ") + 1);
     printToConsole(CryptoJS.SHA3(message));
-}        
+}
+
+/**
+ * Takes a string that is a partially completed command and returns an array of commands to autocomplete, or undefined if there is no match
+ */
+function tab(input){
+    var wordCount = input.split(" ").length
+    switch (true) {
+        case (wordCount == 1):
+            // A string that has no spaces is a command and that needs to be completed.
+            var commandFilter = function(v){
+                return v.startsWith(input)
+            }
+            return Object.keys(commandRegister).filter( commandFilter );
+            break;
+        case (wordCount > 1):
+            // A string that has more than one word in it will be needing a file/folder to complete
+            var commandFilter = function(v){
+                return v.startsWith(input.split(" ").pop())
+            }
+            return curDir.files.filter( commandFilter ).concat(curDir.childFolders.filter( commandFilter ))
+            break;
+        default:
+            // If the string doesn't have word count of 1 or greater than 1 then it must be empty
+            return;
+    }
+}
 
 function commands() {
     addToHelpRegister(sha, "Encrypt a string using SHA3 encoding")
@@ -425,26 +459,26 @@ function initFolders(){
     folderArray["~"]        = {name:"~", 
                                parent:undefined, 
                                childFolders:["journals", "logs"], 
-                               files:undefined, 
+                               files:[], 
                                pwd:undefined};
     folderArray["logs"]     = {name:"logs", 
                                parent:"~", 
-                               childFolders:undefined, 
+                               childFolders:[], 
                                files:["log_3/9/15.txt", "log_17/9/15.txt", "log_25/9/15.txt"], 
                                pwd:undefined};
     folderArray["journals"] = {name:"journals", 
                                parent:"~", 
                                childFolders:["roland", "violet"], 
-                               files:undefined, 
+                               files:[], 
                                pwd:undefined};
     folderArray["roland"]   = {name:"roland", 
                                parent:"journals", 
-                               childFolders:undefined, 
+                               childFolders:[], 
                                files:["roland-1.txt", "roland-2.txt", "roland-3.txt"], 
                                pwd:'27cfe1c4c58e082c734bd19495dc681aed2563468cd5a6903f98580198e7e0cd4a615e67135f41c81fb861e967e7b660a0fa748515c7ee8cd94963d94434b13a'};
     folderArray["violet"]   = {name:"violet", 
                                parent:"journals", 
-                               childFolders:undefined, 
+                               childFolders:[], 
                                files:["violet-1.txt", "violet-2.txt", "violet-3.txt"], 
                                pwd:"75741bbec44faa40ff4479e7640339b87f2b92fd6b5f11dd16a739006faf9c1415e06a3c21438bf96a45eb0dce0e9105e1be858f1dee981864b1e581a54c3af3"};
     
@@ -499,12 +533,30 @@ function enableBinds(){
     });
     $(document).keydown(function (e) {
         $('#input').focus();
-        if (e.which == 38) {
-            historyUp();
-        } else if (e.which == 40) {
-            historyDown();
-        } else {
-            keyIndex = commandHistory.length;
+        switch (e.which) {
+            case 38:
+                historyUp();
+                break;
+            case 40:
+                historyDown();
+                break;
+            case 9:
+                e.preventDefault();
+                var prediction = tab(getInputValue());
+                if (prediction.length == 1) {
+                    // Get the current input value and pop off the partially completed part
+                    // Then push on the prediction
+                    var completeCommand = getInputValue().split(" ");
+                    completeCommand.pop();
+                    completeCommand.push(prediction[0])
+                    setInputValue(completeCommand.join(" "))
+                } else if (prediction.length > 1) {
+                    printToConsole('<pre style="display:inline;">' + "$ " + curDir.name + "&gt;" + getInputValue() + "</pre>");
+                    printToConsole(prediction.join(" "))
+                }
+                break;
+            default:
+                keyIndex = commandHistory.length;
         }
     });
     $('#input').focus();
