@@ -548,11 +548,13 @@ function enableBinds(){
                     // Then push on the prediction
                     var completeCommand = getInputValue().split(" ");
                     completeCommand.pop();
-                    completeCommand.push(prediction[0])
-                    setInputValue(completeCommand.join(" "))
+                    completeCommand.push(prediction[0]);
+                    setInputValue(completeCommand.join(" "));
+                    window.scrollTo(0,document.body.scrollHeight);
                 } else if (prediction.length > 1) {
                     printToConsole('<pre style="display:inline;">' + "$ " + curDir.name + "&gt;" + getInputValue() + "</pre>");
                     printToConsole(prediction.join(" "))
+                    window.scrollTo(0,document.body.scrollHeight);
                 }
                 break;
             default:
